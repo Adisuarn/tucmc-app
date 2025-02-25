@@ -4,3 +4,33 @@
 @theme {
   --font-sans: var(--font-geist-sans);
 }
+
+@layer base {
+  body {
+    @apply bg-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#f687b3] text-white py-2 px-4 rounded transition-colors duration-300 ease-in-out hover:bg-[#f46b9e];
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.group:hover .group-hover\:scale-110 {
+  transform: scale(1.1);
+}

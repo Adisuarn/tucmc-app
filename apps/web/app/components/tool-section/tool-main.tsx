@@ -29,6 +29,7 @@ const ToolMain = () => {
           icon={<tool.icon className="h-8 w-8" />}
           href={tool.href}
           className={`bg-gradient-to-br ${tool.gradient}`}
+          usable={tool.usable}
         />
       ))}
       <NewsletterCard />

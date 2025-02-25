@@ -3,6 +3,7 @@
 
 @theme {
   --font-sans: var(--font-geist-sans);
+  --font-noto-sans-thai: var(--font-noto-sans-thai);
 }
 
 @layer base {

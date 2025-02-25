@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {},
+  "exclude": ["node_modules"],
+  "extends": "@tucc/tsconfig/internal-package.json",
+  "include": ["src", "env.ts"]
+}

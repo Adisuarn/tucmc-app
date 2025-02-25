@@ -1,0 +1,13 @@
+{
+  "extends": "@tucc/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { 
+      "@/*": ["./*"], 
+      "@tucc/ui/*": ["../../packages/ui/src/*"],
+      "@components/*": ["./app/components/*"],
+    }
+  },
+  "include": [".", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

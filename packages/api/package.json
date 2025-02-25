@@ -1,0 +1,37 @@
+{
+  "name": "@tucc/api",
+  "version": "2.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc --watch",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@tucc/prettier-config",
+  "dependencies": {
+    "@trpc/server": "^11.0.0-rc.802",
+    "@tucc/auth": "workspace:*",
+    "@tucc/db": "workspace:*",
+    "superjson": "^2.2.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@tucc/eslint-config": "workspace:*",
+    "@tucc/prettier-config": "workspace:*",
+    "@tucc/tsconfig": "workspace:*",
+    "eslint": "latest",
+    "prettier": "latest",
+    "typescript": "latest"
+  }
+}

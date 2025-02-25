@@ -1,0 +1,9 @@
+{
+  "extends": "@tucc/tsconfig/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@tucc/ui/*": ["./src/*"] }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

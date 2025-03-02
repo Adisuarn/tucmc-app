@@ -16,7 +16,7 @@ const  RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
       <body className={cn('min-h-dvh font-sans antialiased', geistSans.variable, notoSansThai.variable)}>
         <Providers>
           {children}
-          <Toaster />
+          <Toaster  position="top-center" richColors />
         </Providers>
       </body>
     </html>

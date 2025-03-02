@@ -138,34 +138,17 @@ const ActivityStudents = () => {
                     )}
                   </div>
 
-                  <div className="col-span-1">
-                    <Label className={getFieldError(index, 'room') ? 'text-red-500' : ''}>
-                      ห้อง
-                    </Label>
-                    <Input
-                      type="number"
-                      value={student.room}
-                      onChange={e => setFieldValue(`students.${index}.room`, e.target.value)}
-                      placeholder="ห้อง"
-                      min="1"
-                      className={getFieldError(index, 'room') ? 'border-red-500' : ''}
-                    />
-                    {getFieldError(index, 'room') && (
-                      <p className="text-sm text-red-500 mt-1">{getFieldError(index, 'room')}</p>
-                    )}
-                  </div>
-
-                  <div className="col-span-1">
+                  <div className="col-span-2">
                     <Label className={getFieldError(index, 'number') ? 'text-red-500' : ''}>
                       เลขที่
                     </Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={student.number}
                       onChange={e => setFieldValue(`students.${index}.number`, e.target.value)}
                       placeholder="เลขที่"
-                      min="1"
-                      max="50"
+                      minLength={1}
+                      maxLength={2}
                       className={getFieldError(index, 'number') ? 'border-red-500' : ''}
                     />
                     {getFieldError(index, 'number') && (
@@ -176,22 +159,26 @@ const ActivityStudents = () => {
               </div>
             ))}
 
-            <button
-              type="button"
-              onClick={() => {
-                arrayHelpers.push({
-                  title: '',
-                  firstName: '',
-                  lastName: '',
-                  level: '',
-                  room: '',
-                  number: ''
-                })
-              }}
-              className="w-full min-h-[50px] md:min-h-[400px] border-2 border-dashed rounded-lg text-gray-500 hover:bg-gray-50 transition-colors flex items-center justify-center"
-            >
-              + เพิ่มรายชื่อนักเรียน
-            </button>
+            {values.students.length < 6 && (
+              <button
+                type="button"
+                onClick={() => {
+                  arrayHelpers.push({
+                    title: '',
+                    firstName: '',
+                    lastName: '',
+                    level: '',
+                    number: ''
+                  })
+                }}
+                className="w-full min-h-[50px] md:min-h-[400px] border-2 border-dashed rounded-lg text-gray-500 hover:bg-gray-50 transition-colors flex flex-col items-center justify-center gap-2"
+              >
+                <span>+ เพิ่มรายชื่อนักเรียน</span>
+                <span className="text-sm text-gray-400">
+                  (เพิ่มได้อีก {6 - values.students.length} คน)
+                </span>
+              </button>
+            )}
           </div>
         )}
       />

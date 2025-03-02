@@ -376,3 +376,7 @@
   --color-sidebar-ring:
     var(--sidebar-ring);
 }
+
+#thdpk-container {
+  width: 100%
+}

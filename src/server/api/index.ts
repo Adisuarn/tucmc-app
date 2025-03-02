@@ -1,7 +1,6 @@
 import { treaty } from '@elysiajs/eden'
-
 import { elysia } from './root'
-import { testRouter } from '@/server/api/routers/test'
+import { activityRouter } from '@/server/api/routers/activity'
 
 /**
  * This is the primary router for your server.
@@ -9,7 +8,8 @@ import { testRouter } from '@/server/api/routers/test'
  * All routers added in /api/routers should be manually added here.
  */
 
-const appRouter = elysia({ prefix: '/api/elysia' }).use(testRouter)
+const appRouter = elysia({ prefix: '/api/elysia' })
+  .use(activityRouter)
 
 // export type definition of API
 type AppRouter = typeof appRouter

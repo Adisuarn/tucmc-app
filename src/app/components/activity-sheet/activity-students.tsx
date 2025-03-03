@@ -1,5 +1,3 @@
-"use client"
-
 import React from 'react'
 import { useFormikContext, FieldArray } from 'formik'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
@@ -7,30 +5,40 @@ import { Input } from '@components/ui/input'
 import { Label } from '@components/ui/label'
 import { Separator } from '@components/ui/separator'
 import { cn } from '@/libs/utils'
+import { ActivitySheetSchema } from '@/app/(features)/activity-sheet/page'
+
+interface Props {
+  namePrefix: string;
+}
 
 interface Student {
   title: string
   firstName: string
   lastName: string
   level: string
-  room: string
   number: string
 }
 
-interface FormValues {
-  students: Student[]
-}
-
-const ActivityStudents = () => {
-  const { values, setFieldValue, errors, touched } = useFormikContext<FormValues>()
+const ActivityStudents = ({ namePrefix }: Props) => {
+  //eslint-disable-next-line
+  const { values, setFieldValue, errors, touched } = useFormikContext<any>()
+  const sheetIndex = namePrefix.split('.')[1]!;
+  const students = values.sheets?.[sheetIndex]?.students || [];
 
   const getFieldError = (index: number, field: keyof Student): string | undefined => {
-    if (!errors.students || !touched.students) return undefined
-    const studentErrors = errors.students[index] as Record<keyof Student, string> | undefined
-    const studentTouched = touched.students[index] as Record<keyof Student, boolean> | undefined
-    if (!studentErrors || !studentTouched) return undefined
-    return studentTouched[field] ? studentErrors[field] : undefined
-  }
+    //@ts-expect-error : ignore
+    if (!errors.sheets?.[sheetIndex]?.students ||
+      //@ts-expect-error : ignore
+      !touched.sheets?.[sheetIndex]?.students) return undefined;
+
+    //@ts-expect-error : ignore
+    const studentErrors = errors.sheets[sheetIndex]?.students?.[index];
+    //@ts-expect-error : ignore
+    const studentTouched = touched.sheets[sheetIndex]?.students?.[index];
+
+    if (!studentErrors || !studentTouched) return undefined;
+    return studentTouched[field] ? studentErrors[field] : undefined;
+  };
 
   return (
     <div className="w-full">
@@ -41,17 +49,17 @@ const ActivityStudents = () => {
       </div>
 
       <FieldArray
-        name="students"
+        name={namePrefix}
         render={arrayHelpers => (
           <div className="space-y-6 md:grid md:grid-cols-3 md:gap-3">
-            {values.students.map((student, index) => (
+            {students.map((student: Student, index: number) => (
               <div
                 key={index}
                 className="p-4 border rounded-lg space-y-4 shadow-xs min-h-[400px] h-full"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium">นักเรียนคนที่ {index + 1}</h4>
-                  {values.students.length > 1 && (
+                  {students.length > 1 && (
                     <button
                       type="button"
                       onClick={() => arrayHelpers.remove(index)}
@@ -69,7 +77,7 @@ const ActivityStudents = () => {
                     </Label>
                     <Select
                       value={student.title}
-                      onValueChange={(value) => setFieldValue(`students.${index}.title`, value)}
+                      onValueChange={(value) => setFieldValue(`${namePrefix}.${index}.title`, value)}
                     >
                       <SelectTrigger className={cn("whitespace-nowrap", getFieldError(index, 'title') ? 'border-red-500' : '')}>
                         <SelectValue placeholder="เลือกคำนำหน้า" className="text-ellipsis overflow-hidden" />
@@ -92,7 +100,7 @@ const ActivityStudents = () => {
                     </Label>
                     <Select
                       value={student.level}
-                      onValueChange={(value) => setFieldValue(`students.${index}.level`, value)}
+                      onValueChange={(value) => setFieldValue(`${namePrefix}.${index}.level`, value)}
                     >
                       <SelectTrigger className={getFieldError(index, 'level') ? 'border-red-500' : ''}>
                         <SelectValue placeholder="เลือกชั้น" />
@@ -114,7 +122,7 @@ const ActivityStudents = () => {
                     </Label>
                     <Input
                       value={student.firstName}
-                      onChange={e => setFieldValue(`students.${index}.firstName`, e.target.value)}
+                      onChange={e => setFieldValue(`${namePrefix}.${index}.firstName`, e.target.value)}
                       placeholder="ชื่อจริง"
                       className={getFieldError(index, 'firstName') ? 'border-red-500' : ''}
                     />
@@ -129,7 +137,7 @@ const ActivityStudents = () => {
                     </Label>
                     <Input
                       value={student.lastName}
-                      onChange={e => setFieldValue(`students.${index}.lastName`, e.target.value)}
+                      onChange={e => setFieldValue(`${namePrefix}.${index}.lastName`, e.target.value)}
                       placeholder="นามสกุล"
                       className={getFieldError(index, 'lastName') ? 'border-red-500' : ''}
                     />
@@ -145,7 +153,7 @@ const ActivityStudents = () => {
                     <Input
                       type="text"
                       value={student.number}
-                      onChange={e => setFieldValue(`students.${index}.number`, e.target.value)}
+                      onChange={e => setFieldValue(`${namePrefix}.${index}.number`, e.target.value)}
                       placeholder="เลขที่"
                       minLength={1}
                       maxLength={2}
@@ -159,7 +167,7 @@ const ActivityStudents = () => {
               </div>
             ))}
 
-            {values.students.length < 6 && (
+            {students.length < 6 && (
               <button
                 type="button"
                 onClick={() => {
@@ -175,7 +183,7 @@ const ActivityStudents = () => {
               >
                 <span>+ เพิ่มรายชื่อนักเรียน</span>
                 <span className="text-sm text-gray-400">
-                  (เพิ่มได้อีก {6 - values.students.length} คน)
+                  (เพิ่มได้อีก {6 - students.length} คน)
                 </span>
               </button>
             )}

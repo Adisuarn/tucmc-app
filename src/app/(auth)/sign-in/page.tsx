@@ -3,6 +3,7 @@
 import { Button } from "@components/ui/button"
 import { Sparkles } from "lucide-react"
 import { authClient } from '@/libs/auth/auth-client'
+import { toast } from "sonner"
 
 export default function SignInPage() {
   const handleLoginClick = async () => {
@@ -14,6 +15,7 @@ export default function SignInPage() {
       provider: "google",
     })
     if (error) {
+      toast.error("Failed to Sign in. Please contact support.")
       console.error(error)
     }
   }
@@ -25,7 +27,7 @@ export default function SignInPage() {
           <Sparkles className="h-8 w-8 text-[#f687b3] mr-2" />
           <h1 className="text-2xl font-bold text-gray-800">Sign In To Continue</h1>
         </div>
-        <Button onClick={handleLoginClick} className="w-full bg-[#4285F4] hover:bg-[#3367D6] text-white">
+        <Button onClick={handleLoginClick} className="w-full">
           Sign in with Google
         </Button>
       </div>

@@ -22,7 +22,7 @@ export function GET(req: NextRequest) {
         <div tw="flex flex-row items-center mb-3 text-white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`https://tiesen.id.vn/assets/logo.svg`}
+            src={`logo.png`}
             tw="w-20 h-20 mr-4"
             style={{ filter: 'invert(1)' }}
           />

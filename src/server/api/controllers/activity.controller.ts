@@ -5,7 +5,7 @@ import fontkit from '@pdf-lib/fontkit'
 import * as fs from 'fs/promises'
 import type { docData } from '../types/activity.type'
 
-export const documentBuilder = async (data: docData) => {
+export const documentBuilder = async (data: docData[]) => {
   try {
     const pdfDoc = await PDFDocument.create()
 

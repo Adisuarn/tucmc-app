@@ -19,10 +19,6 @@ const NavButton = ({
   const ButtonComponent = (
     <Button
       variant={type}
-      className={type === 'outline'
-        ? "border-[#f687b3] text-[#f687b3] hover:bg-[#f687b3] hover:text-white"
-        : "text-gray-600 hover:text-[#f687b3] hover:bg-pink-50"
-      }
       onClick={fn}
     >
       {text}

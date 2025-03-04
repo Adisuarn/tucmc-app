@@ -1,6 +1,4 @@
-"use client"
-
-import React, { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { ThaiDatePicker } from "thaidatepicker-react";
 import { Field, ErrorMessage, useField, useFormikContext } from "formik"
 import { Input } from "@components/ui/input"
@@ -11,27 +9,6 @@ import { Separator } from '@components/ui/separator';
 interface Props {
   namePrefix?: string;
 }
-
-const TitleSelect = ({ name }: { name: string }) => {
-  const { setFieldValue } = useFormikContext();
-  const [field] = useField(name);
-
-  return (
-    <Select
-      value={field.value}
-      onValueChange={(value) => setFieldValue(name, value)}
-    >
-      <SelectTrigger className="w-full py-5">
-        <SelectValue placeholder="เลือกคำนำหน้า" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="นาย">นาย</SelectItem>
-        <SelectItem value="นาง">นาง</SelectItem>
-        <SelectItem value="นางสาว">นางสาว</SelectItem>
-      </SelectContent>
-    </Select>
-  );
-};
 
 const PeriodSelect = ({ name }: { name: string }) => {
   const { setFieldValue } = useFormikContext();
@@ -57,20 +34,19 @@ const PeriodSelect = ({ name }: { name: string }) => {
 };
 
 const ActivityDetail = ({ namePrefix = '' }: Props) => {
-  const [date, setDate] = useState(new Date().toISOString());
+
   const { setFieldValue } = useFormikContext();
+  const [dateField] = useField(`${namePrefix}.date`);
+
+  const currentSheetDate = dateField.value || new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    const initDate = async () => {
-      try {
-        await setFieldValue(`${namePrefix}.date`, date.split("T")[0]);
-      } catch (error) {
-        console.log(error)
-      }
+    if (!dateField.value) {
+      const initDate = async () => await setFieldValue(`${namePrefix}.date`, new Date().toISOString().split('T')[0]);
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      initDate();
     }
-    //eslint-disable-next-line
-    initDate();
-  }, [namePrefix, setFieldValue, date]);
+  }, [namePrefix, setFieldValue, dateField.value]);
 
   return (
     <div className="w-full mx-auto">
@@ -89,7 +65,7 @@ const ActivityDetail = ({ namePrefix = '' }: Props) => {
           <Label htmlFor={`${namePrefix}.activityDetail`} className="text-lg">วันที่</Label>
           <div className="flex border min-w-full w-full rounded-sm justify-center">
             <ThaiDatePicker
-              value={date}
+              value={currentSheetDate}
               clearable={false}
               customInput={Input}
               inputProps={{
@@ -97,7 +73,6 @@ const ActivityDetail = ({ namePrefix = '' }: Props) => {
                 displayFormat: "DD MMMM YYYY",
               }}
               onChange={async (buddhistDate) => {
-                setDate(buddhistDate);
                 await setFieldValue(`${namePrefix}.date`, buddhistDate);
               }}
             />
@@ -134,26 +109,12 @@ const ActivityDetail = ({ namePrefix = '' }: Props) => {
       </div>
       <div className="mt-5">
         <h3 className='text-2xl'>ครูผู้ขออนุญาต</h3>
-        <p className='text-lg text-gray-400 mb-3'>ชื่อคุณครูผู้รับผิดชอบในการจัดกิจกรรมและขอเวลาเรียน</p>
+        <p className='text-lg text-gray-400 mb-1'>ชื่อคุณครูผู้รับผิดชอบในการจัดกิจกรรมและขอเวลาเรียน</p>
+        <p className='text-md text-gray-400'>หมายเหตุ: ที่ปรึกษาชมรมให้ กรอกในชื่อจริงว่า &quot;ที่ปรึกษาชื่อชมรม&quot; แล้วเว้นว่างช่องอื่น ๆ</p>
+        <p className='text-md text-gray-400 mb-3'>หมายเหตุ 2: หากชื่อชมรมยาวเกินไป ให้ตัดชื่อชมรมบางส่วนมาใส่ในช่อง &quot;ตำแหน่ง&quot;</p>
         <Separator />
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-5">
-        <div>
-          <Label htmlFor={`${namePrefix}.TTitle`} className="text-lg">คำนำหน้า</Label>
-          <TitleSelect name={`${namePrefix}.TTitle`} />
-          <ErrorMessage className='text-red-500 mt-3' name={`${namePrefix}.TTitle`} component="div" />
-        </div>
-        <div>
-          <Label htmlFor={`${namePrefix}.TPosition`} className="text-lg">ตำแหน่ง</Label>
-          <Field
-            as={Input}
-            type="text"
-            name={`${namePrefix}.TPosition`}
-            className="p-5"
-            placeholder="เช่น ครูผู้ช่วย"
-          />
-          <ErrorMessage className='text-red-500 mt-3' name={`${namePrefix}.TPosition`} component="div" />
-        </div>
         <div>
           <Label htmlFor={`${namePrefix}.TFirstName`} className="text-lg">ชื่อจริง</Label>
           <Field as={Input} type="text" name={`${namePrefix}.TFirstName`} className="p-5" placeholder="สมชาย" />
@@ -163,6 +124,17 @@ const ActivityDetail = ({ namePrefix = '' }: Props) => {
           <Label htmlFor={`${namePrefix}.TLastName`} className="text-lg">นามสกุล</Label>
           <Field as={Input} type="text" name={`${namePrefix}.TLastName`} className="p-5" placeholder="ใจดี" />
           <ErrorMessage className='text-red-500 mt-3' name={`${namePrefix}.TLastName`} component="div" />
+        </div>
+        <div className='col-span-2'>
+          <Label htmlFor={`${namePrefix}.TPosition`} className="text-lg">ตำแหน่ง</Label>
+          <Field
+            as={Input}
+            type="text"
+            name={`${namePrefix}.TPosition`}
+            className="p-5"
+            placeholder="เช่น ครูผู้ช่วย"
+          />
+          <ErrorMessage className='text-red-500 mt-3' name={`${namePrefix}.TPosition`} component="div" />
         </div>
       </div>
     </div>

@@ -4,14 +4,16 @@ import { Separator } from '@components/ui/separator'
 import ActivityDetail from '@components/activity-sheet/activity-detail'
 import { useState } from 'react'
 import ActivityStudents from '@components/activity-sheet/activity-students'
-import { Formik, Form } from 'formik'
+import { Formik, Form, FormikErrors } from 'formik'
 import * as Yup from 'yup'
 import { Button } from '@components/ui/button'
 import { api } from '@/libs/api'
 import { toast } from 'sonner'
 import PDFPagination from '@components/pdf-pagination'
+import { cn } from '@/libs/utils'
+import { Loader2 } from "lucide-react";
 
-export const ActivitySheetSchema = Yup.object().shape({
+const ActivitySheetSchema = Yup.object().shape({
   sheets: Yup.array().of(
     Yup.object().shape({
       id: Yup.string().required(),
@@ -19,10 +21,9 @@ export const ActivitySheetSchema = Yup.object().shape({
       date: Yup.string(),
       startPeriod: Yup.string(),
       endPeriod: Yup.string(),
-      TTitle: Yup.string(),
       TFirstName: Yup.string().required('กรุณากรอกชื่อจริง'),
-      TLastName: Yup.string().required('กรุณากรอกนามสกุล'),
-      TPosition: Yup.string().required('กรุณากรอกตำแหน่ง'),
+      TLastName: Yup.string(),
+      TPosition: Yup.string(),
       room: Yup.string().required('กรุณากรอกห้อง').min(1, 'เลขห้องต้องมากกว่า 0'),
       students: Yup.array().of(
         Yup.object().shape({
@@ -44,7 +45,6 @@ const createEmptySheet = (id: number) => ({
   startPeriod: '1',
   endPeriod: '8',
   room: '',
-  TTitle: '',
   TFirstName: '',
   TLastName: '',
   TPosition: '',
@@ -66,6 +66,11 @@ const initialValues = {
 const ActivitySheetPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
+  const isPageValid = (errors: FormikErrors<{ sheets: typeof initialValues.sheets }>, pageIndex: number) => {
+    const pageErrors = errors.sheets?.[pageIndex];
+    return !pageErrors;
+  };
+
   return (
     <section className="flex flex-col font-noto-sans-thai items-center my-10 px-5">
       <div className='w-full mt-5 max-w-md md:max-w-4xl lg:max-w-6xl '>
@@ -76,41 +81,46 @@ const ActivitySheetPage = () => {
       </div>
       <Formik
         initialValues={initialValues}
-        validationSchema={ActivitySheetSchema}
-        onSubmit={async (values, { setSubmitting, setStatus }) => {
-          window.alert(JSON.stringify(values, null, 2))
-          // try {
-          //   const { data, error } = await api.activity.generate.post(values)
-          //   switch (error?.status) {
-          //     case 400:
-          //       toast.error(error.value)
-          //       return
-          //     case 500:
-          //       toast.error('Failed to generate PDF. Please try again.')
-          //       return
-          //   }
-          //   toast.success('PDF is created successfully.')
-          //   const link = document.createElement('a')
-          //   const dataUri = data?.startsWith('data:') ? data : `data:application/pdf;base64,${data}`
-          //   link.href = dataUri
-          //   link.download = `activity-sheet-${new Date().getTime()}.pdf`
-          //   document.body.appendChild(link)
-          //   link.click()
-          //   document.body.removeChild(link)
-          // } catch (error) {
-          //   console.error('Error generating PDF:', error)
-          //   setStatus('Failed to generate PDF. Please try again.')
-          // } finally {
-          //   setSubmitting(false)
-          // }
+        validationSchema={ActivitySheetSchema} 
+        validateOnMount={false}
+        validateOnBlur={false}
+        validateOnChange={false}
+        onSubmit={async (values, { setSubmitting }) => {
+          try {
+            const { data, error } = await api.activity.generate.post(values)
+            switch (error?.status) {
+              case 400:
+                toast.error(error.value)
+                return
+              case 422:
+                toast.error(error.value.message)
+                return
+              case 500:
+                toast.error('Failed to generate PDF. Please try again')
+                return
+            }
+            toast.success('PDF is created successfully')
+            const link = document.createElement('a')
+            const dataUri = data?.startsWith('data:') ? data : `data:application/pdf;base64,${data}`
+            link.href = dataUri
+            link.download = `activity-sheet-${new Date().getTime()}.pdf`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          } catch (error) {
+            console.error('Error generating PDF:', error)
+          } finally {
+            setSubmitting(false)
+          }
         }}
       >
-        {({ values, isSubmitting, setFieldValue }) => (
+        {({ values, isSubmitting, setFieldValue, errors }) => (
           <Form className="w-full max-w-md md:max-w-4xl lg:max-w-6xl">
             
             <PDFPagination
               currentPage={currentPage}
               totalPages={values.sheets.length}
+              pageValidation={values.sheets.map((_, index) => isPageValid(errors, index))}
               onPageChange={(page) => setCurrentPage(page)}
               onAddPage={async () => {
                 const newId = values.sheets.length + 1;
@@ -159,9 +169,19 @@ const ActivitySheetPage = () => {
                 type="submit"
                 variant="default"
                 disabled={isSubmitting}
-                className="w-full max-w-md"
+                className={cn(
+                  "w-full max-w-md relative",
+                  isSubmitting && "cursor-not-allowed opacity-70"
+                )}
               >
-                {isSubmitting ? "กำลังพิมพ์..." : "พิมพ์ใบกิจกรรม"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    กำลังพิมพ์...
+                  </>
+                ) : (
+                  "พิมพ์ใบกิจกรรม"
+                )}
               </Button>
             </div>
           </Form>

@@ -1,19 +1,26 @@
+import { cn } from "@/libs/utils";
 import { Button } from "./ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
+import { useWindowSize } from '@react-hookz/web';
+
 
 const PDFPagination = ({
   currentPage,
   totalPages,
+  pageValidation,
   onPageChange,
   onAddPage,
   onRemovePage
 }: {
   currentPage: number;
   totalPages: number;
+  pageValidation: boolean[];
   onPageChange: (page: number) => void;
   onAddPage: () => void;
   onRemovePage: (page: number) => void;
-}) => {
+  }) => {
+  const { width } = useWindowSize();
+  const MAX_PAGES = 8;
   return (
     <div className="flex items-center gap-2 mb-4 mt-5">
       <div className="flex gap-2">
@@ -22,6 +29,9 @@ const PDFPagination = ({
             <Button
               type="button"
               variant={currentPage === page ? "default" : "outline"}
+              className={cn(
+                (!pageValidation[page - 1]) && "bg-red-400 text-white hover:bg-red-400/90"
+              )}
               onClick={() => onPageChange(page)}
             >
               {page}
@@ -46,13 +56,17 @@ const PDFPagination = ({
         type="button"
         variant="outline"
         onClick={onAddPage}
-        className="flex items-center gap-2"
+        disabled={totalPages >= MAX_PAGES}
+        className={cn(
+          "flex items-center gap-2",
+          totalPages >= MAX_PAGES && "opacity-50 cursor-not-allowed"
+        )}
       >
         <PlusCircle className="h-4 w-4" />
-        Add Page
+        {width > 768 && "Add Page"}
       </Button>
     </div>
-  )
-}
+  );
+};
 
-export default PDFPagination
+export default PDFPagination;

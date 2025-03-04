@@ -10,13 +10,12 @@ export interface student {
 }
 
 export interface docData {
-  id: string
+  id: number
   activityName: string,
   date: string,
   startPeriod: string,
   endPeriod: string,
   room: string,
-  TTitle: string,
   TFirstName: string,
   TLastName: string,
   TPosition: string,
@@ -25,13 +24,12 @@ export interface docData {
 
 export const pdfGenerateBody = t.Object({
   sheets: t.Array(t.Object({
-    id: t.String(),
+    id: t.Number(),
     activityName: StringField('Please provide an activity name'),
     date: StringField('Please provide a date'),
     startPeriod: StringField('Please provide a start period'),
     endPeriod: StringField('Please provide an end period'),
     room: StringField('Please provide a room'),
-    TTitle: StringField('Please provide teacher title'),
     TFirstName: StringField('Please provide teacher first name'),
     TLastName: StringField('Please provide teacher last name'),
     TPosition: t.String({ error: 'Please provide a position' }),

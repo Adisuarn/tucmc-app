@@ -1,11 +1,9 @@
-import React from 'react'
 import { useFormikContext, FieldArray } from 'formik'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { Input } from '@components/ui/input'
 import { Label } from '@components/ui/label'
 import { Separator } from '@components/ui/separator'
 import { cn } from '@/libs/utils'
-import { ActivitySheetSchema } from '@/app/(features)/activity-sheet/page'
 
 interface Props {
   namePrefix: string;

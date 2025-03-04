@@ -31,5 +31,5 @@ export function formatThaiDate(isoDateString: string): string {
   const month = thaiMonths[date.getMonth()];
   const year = date.getFullYear() + 543;
 
-  return `วันที่ ${day} เดือน ${month} พ.ศ.${year}`;
+  return `วันที่ ${day} เดือน ${month} พ.ศ. ${year}`;
 }

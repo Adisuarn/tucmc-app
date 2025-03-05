@@ -1,181 +1,157 @@
 import path from 'path'
-import { PDFDocument, PDFFont, PageSizes, rgb } from 'pdf-lib'
-import { formatThaiDate, startPeriodtoTime, endPeriodtoTime } from '../constants/pdfconstant'
+import { PDFDocument, PageSizes, rgb, PDFPage, PDFFont } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import * as fs from 'fs/promises'
+import { formatThaiDate, startPeriodtoTime, endPeriodtoTime } from '../constants/pdfconstant'
+import { PDF_CONFIG } from '../constants/pdfconstant'
+import { wrapText, justifyText, drawDocumentHeader, PDFGenerationError } from '../utils/pdfutils'
 import type { docData } from '../types/activity.type'
-import { error } from 'elysia'
 
-export const documentBuilder = async (data: docData[]) => {
+async function loadPDFAssets(pdfDoc: PDFDocument) {
+  try {
+    pdfDoc.registerFontkit(fontkit)
+    const assetsPath = path.join(process.cwd(), PDF_CONFIG.ASSETS_PATH)
+
+    const [THSarabunByte, THSarabunBoldByte, TULogoByte] = await Promise.all([
+      fs.readFile(path.join(assetsPath, 'THSarabunNew.ttf')),
+      fs.readFile(path.join(assetsPath, 'THSarabunNew Bold.ttf')),
+      fs.readFile(path.join(assetsPath, 'Logo.png'))
+    ])
+
+    const [THSarabun, THSarabunBold, TULogo] = await Promise.all([
+      pdfDoc.embedFont(THSarabunByte),
+      pdfDoc.embedFont(THSarabunBoldByte),
+      pdfDoc.embedPng(TULogoByte)
+    ])
+
+    return { THSarabun, THSarabunBold, TULogo }
+  } catch (error) {
+    throw new PDFGenerationError('Failed to load PDF assets', error as Error)
+  }
+}
+
+async function drawStudentList(
+  page: PDFPage,
+  students: docData['students'],
+  font: PDFFont,
+  finalYPosition: number
+) {
+  students.forEach((student, index) => {
+    const studentY = (finalYPosition - 20) - 58 - (index * 20)
+
+    page.drawRectangle({
+      x: PDF_CONFIG.MARGIN.left,
+      y: studentY - 7,
+      width: 220,
+      height: 20,
+      borderWidth: 0.5,
+      borderColor: rgb(0, 0, 0),
+    })
+
+    page.drawText(
+      `${index + 1}. ${student.firstName} ${student.lastName} เลขที่ ${student.number}`, {
+      font: font,
+      size: PDF_CONFIG.FONT_SIZE,
+      x: PDF_CONFIG.MARGIN.left + 10,
+      y: studentY
+    })
+  })
+}
+
+async function drawSignature(
+  page: PDFPage,
+  item: docData,
+  font: PDFFont,
+  finalYPosition: number
+) {
+  const signatureY = finalYPosition - 100
+
+  page.drawText('ขอแสดงความนับถือ', {
+    font: font,
+    size: PDF_CONFIG.FONT_SIZE,
+    x: PDF_CONFIG.MARGIN.left * 5.5,
+    y: signatureY
+  })
+
+  const signatureLine = '(.......................................................)'
+  const signatureLineX = (PDF_CONFIG.MARGIN.left * 5) + 5
+  const signatureLineY = signatureY - 65
+
+  page.drawText(signatureLine, {
+    font: font,
+    size: PDF_CONFIG.FONT_SIZE,
+    x: signatureLineX,
+    y: signatureLineY
+  })
+
+  const signatureLineWidth = font.widthOfTextAtSize(signatureLine, PDF_CONFIG.FONT_SIZE)
+  const TName = `ครู${item.TFirstName} ${item.TLastName}`
+  const TNameTextWidth = font.widthOfTextAtSize(TName, PDF_CONFIG.FONT_SIZE)
+  const teacherNameX = signatureLineX + (signatureLineWidth - TNameTextWidth) / 2
+
+  page.drawText(TName, {
+    font: font,
+    size: PDF_CONFIG.FONT_SIZE,
+    x: teacherNameX,
+    y: signatureLineY - 15
+  })
+
+  const teacherPositionX = signatureLineX + (signatureLineWidth - font.widthOfTextAtSize(item.TPosition, PDF_CONFIG.FONT_SIZE)) / 2
+
+  page.drawText(item.TPosition, {
+    font: font,
+    size: PDF_CONFIG.FONT_SIZE,
+    x: teacherPositionX,
+    y: signatureLineY - 30
+  })
+
+  return { signatureLineY }
+}
+
+export const documentBuilder = async (data: docData[]): Promise<string> => {
   try {
     const pdfDoc = await PDFDocument.create()
-
-    pdfDoc.registerFontkit(fontkit)
-
-    const THSarabunPath = path.join(process.cwd(), './src/server/api/assets', 'THSarabunNew.ttf')
-    const THSarabunByte = await fs.readFile(THSarabunPath)
-
-    const THSarabunBoldPath = path.join(process.cwd(), './src/server/api/assets', 'THSarabunNew Bold.ttf')
-    const THSarabunBoldByte = await fs.readFile(THSarabunBoldPath)
-
-    const TULogoPath = path.join(process.cwd(), './src/server/api/assets', 'Logo.png')
-    const TULogoByte = await fs.readFile(TULogoPath)
-
-    const THSarabun = await pdfDoc.embedFont(THSarabunByte)
-    const THSarabunBold = await pdfDoc.embedFont(THSarabunBoldByte)
-    const TULogo = await pdfDoc.embedPng(TULogoByte)
+    const assets = await loadPDFAssets(pdfDoc)
 
     let currentPage = pdfDoc.addPage(PageSizes.A4)
     let yOffset = 0
     let isFirstDocOnPage = true
 
-    const MARGIN = {
-      left: 70,
-      right: 70
-    }
-
-    // Calculate document height based on content
-    //const calculateDocumentHeight = (studentCount: number): number => {
-      // Base height for document + extra space for each student
-      //const baseHeight = 230
-      //const studentsHeight = Math.max(0, studentCount - 3) * 10 // Extra height for students
-      //return baseHeight
-    //}
-
-    const baseHeight = 230
-
     for (const item of data) {
-      if (!item) continue
-      // Check document height to determine if we need a new page
-      //const documentHeight = calculateDocumentHeight(item.students.length!)
-
-      if (!isFirstDocOnPage && yOffset + baseHeight > 680) {
+      if (!isFirstDocOnPage && yOffset + 230 > 680) {
         currentPage = pdfDoc.addPage(PageSizes.A4)
         yOffset = 0
         isFirstDocOnPage = true
       }
 
-      // Calculate starting Y position based on whether this is first doc or not
       const startY = isFirstDocOnPage ? 780 : 780 - yOffset
 
-      // Draw logo
-      currentPage.drawImage(TULogo, {
-        width: TULogo.width * 0.3,
-        height: TULogo.height * 0.3,
-        x: 275,
-        y: startY,
-      })
+      // Draw document header
+      drawDocumentHeader(currentPage, assets, item, startY, formatThaiDate)
 
-      // Draw title
-      currentPage.drawText(
-        'แบบขออนุญาตให้นักเรียนมาทำกิจกรรม', {
-        font: THSarabunBold,
-        size: 14,
-        x: 220,
-        y: startY - 30,
-      })
+      // Draw reference text and event details
+      const referenceText = `เนื่องจากมีนักเรียนห้อง ${item.room} จำนวน ${item.students.length} คน ดังมีรายชื่อท้ายหนังสือขออนุญาตฉบับนี้ มีความจำเป็นต้องไป`
+      const refTextWidth = assets.THSarabun.widthOfTextAtSize(referenceText, PDF_CONFIG.FONT_SIZE)
 
-      // Draw date
-      currentPage.drawText(
-        `${formatThaiDate(item.date)}`, {
-        font: THSarabun,
-        size: 14,
-        x: 400,
-        y: startY - 45,
-      })
-
-      // Draw period
-      currentPage.drawText(
-        `เรียน คุณครูผู้สอนคาบที่ ${item.startPeriod}-${item.endPeriod}`, {
-        font: THSarabun,
-        size: 14,
-        x: MARGIN.left,
-        y: startY - 60
-      })
-
-      // Reference text
-      const referenceText = `เนื่องจากมีนักเรียนห้อง ${item.room} ชั้น  ${item.students[0]?.level}  จำนวน ${item.students.length} คน  ดังมีรายชื่อท้ายหนังสือขออนุญาตฉบับนี้  นั้นได้รับ`
-
-      currentPage.drawText(
-        referenceText, {
-        font: THSarabun,
-        size: 14,
-        x: MARGIN.left + 70,
+      currentPage.drawText(referenceText, {
+        font: assets.THSarabun,
+        size: PDF_CONFIG.FONT_SIZE,
+        x: PDF_CONFIG.MARGIN.left + 70,
         y: startY - 80
       })
 
-      const refTextWidth = THSarabun.widthOfTextAtSize(referenceText, 14)
-
-      const wrapText = (text: string, maxWidth: number, font: PDFFont, fontSize: number) => {
-        const words = text.split(' ')
-        const lines: string[] = []
-        let currentLine = words[0]
-
-        for (let i = 1; i < words.length; i++) {
-          const word = words[i]
-          const width = font.widthOfTextAtSize(currentLine + ' ' + word, fontSize)
-
-          if (width < maxWidth + 70) {
-            currentLine += ' ' + word
-          } else {
-            lines.push(currentLine!)
-            currentLine = word
-          }
-        }
-
-        lines.push(currentLine!)
-        return lines
-      }
-
-      const justifyText = (line: string, targetWidth: number, font: PDFFont, fontSize: number) => {
-        const currentWidth = font.widthOfTextAtSize(line, fontSize)
-
-        if (!line.includes(' ')) {
-          return line
-        }
-
-        const spaces = line.split(' ').length - 1
-        if (spaces === 0) return line
-
-        const extraSpaceNeeded = targetWidth - currentWidth
-        const extraSpacePerGap = extraSpaceNeeded / spaces
-        const words = line.split(' ')
-        let justifiedText = words[0]
-        let remainingExtraSpace = extraSpaceNeeded
-
-        for (let i = 1; i < words.length; i++) {
-          const spacesToAdd = i < words.length - 1
-            ? Math.floor(extraSpacePerGap)
-            : Math.ceil(remainingExtraSpace / 5)
-
-          const extraSpace = ' '.repeat(Math.max(1, spacesToAdd))
-          justifiedText += ' ' + extraSpace + words[i]
-          remainingExtraSpace -= spacesToAdd * 1.3
-        }
-
-        const justifiedWidth = font.widthOfTextAtSize(justifiedText!, fontSize)
-        if (targetWidth - justifiedWidth > 10) {
-          justifiedText += ' '.repeat(Math.ceil((targetWidth - justifiedWidth) / 5))
-        }
-
-        return justifiedText
-      }
-
-      const EventText = `อนุญาต ให้ไป${item.activityName} ใน${formatThaiDate(item.date)} ตั้งแต่เวลา ${startPeriodtoTime[item.startPeriod]} น. ถึงเวลา ${endPeriodtoTime[item.endPeriod]} น.`
-      const eventTextLines = wrapText(EventText, refTextWidth, THSarabun, 14)
-
-      for (let i = 0; i < eventTextLines.length - 1; i++) {
-        eventTextLines[i] = justifyText(eventTextLines[i]!, refTextWidth, THSarabun, 14)!
-      }
+      const EventText = `${item.activityName} ใน${formatThaiDate(item.date)} ตั้งแต่เวลา ${startPeriodtoTime[item.startPeriod]} น. ถึงเวลา ${endPeriodtoTime[item.endPeriod]} น.`
+      const eventTextLines = wrapText(EventText, refTextWidth, assets.THSarabun, PDF_CONFIG.FONT_SIZE)
 
       const yPosition = startY - 100
       const lineHeight = 20
 
       eventTextLines.forEach((line, index) => {
+        //const justifiedLine = justifyText(line, refTextWidth, assets.THSarabun, PDF_CONFIG.FONT_SIZE)
         currentPage.drawText(line, {
-          font: THSarabun,
-          size: 14,
-          x: MARGIN.left,
+          font: assets.THSarabun,
+          size: PDF_CONFIG.FONT_SIZE,
+          x: PDF_CONFIG.MARGIN.left,
           y: yPosition - (index * lineHeight)
         })
       })
@@ -184,22 +160,23 @@ export const documentBuilder = async (data: docData[]) => {
 
       currentPage.drawText(
         'ขอความกรุณาคุณครูผู้สอน อนุญาตให้นักเรียนออกจากห้องเรียนไปทำกิจกรรมตามเวลาดังกล่าว และขอ', {
-        font: THSarabun,
-        size: 14,
-        x: MARGIN.left + 70,
+        font: assets.THSarabun,
+        size: PDF_CONFIG.FONT_SIZE,
+        x: PDF_CONFIG.MARGIN.left + 70,
         y: finalYPosition
       })
 
       currentPage.drawText(
         'ความอนุเคราะห์เรื่องเวลาเรียนในช่วงนี้เป็นชั่วโมงกิจกรรม ซึ่งไม่นับเป็นการขาดเรียน ขอขอบคุณในความร่วมมือของคุณครู', {
-        font: THSarabun,
-        size: 14,
-        x: MARGIN.left,
+        font: assets.THSarabun,
+        size: PDF_CONFIG.FONT_SIZE,
+        x: PDF_CONFIG.MARGIN.left,
         y: finalYPosition - 20
       })
 
+      // Draw student list box
       currentPage.drawRectangle({
-        x: MARGIN.left,
+        x: PDF_CONFIG.MARGIN.left,
         y: (finalYPosition - 20) - 45,
         borderWidth: 0.5,
         borderColor: rgb(0, 0, 0),
@@ -209,87 +186,24 @@ export const documentBuilder = async (data: docData[]) => {
 
       currentPage.drawText(
         `ขออนุญาตนักเรียนห้องนี้จำนวน ${item.students.length} คน ดังนี้`, {
-        font: THSarabunBold,
-        size: 14,
-        x: MARGIN.left + 5,
+        font: assets.THSarabunBold,
+        size: PDF_CONFIG.FONT_SIZE,
+        x: PDF_CONFIG.MARGIN.left + 5,
         y: (finalYPosition - 20) - 25
       })
 
-      // Student list
-      item.students.forEach((student, index) => {
-        const studentY = (finalYPosition - 20) - 58 - (index * 20)
+      // Draw student list
+      await drawStudentList(currentPage, item.students, assets.THSarabun, finalYPosition)
 
-        currentPage.drawRectangle({
-          x: MARGIN.left,
-          y: studentY - 7,
-          width: 220,
-          height: 20,
-          borderWidth: 0.5,
-          borderColor: rgb(0, 0, 0),
-        })
-
-        currentPage.drawText(
-          `${index + 1}. ${student.firstName + ' ' + student.lastName} เลขที่ ${student.number}`, {
-          font: THSarabun,
-          size: 14,
-          x: MARGIN.left + 10,
-          y: studentY
-        })
-      })
-
-      const signatureY = finalYPosition - 100
-
-      currentPage.drawText(
-        'ขอแสดงความนับถือ', {
-        font: THSarabun,
-        size: 14,
-        x: MARGIN.left * 5.5,
-        y: signatureY
-      })
-
-      const signatureLine = '(.......................................................)'
-      const signatureLineX = (MARGIN.left * 5) + 5
-      const signatureLineY = signatureY - 65
-
-      currentPage.drawText(
-        signatureLine, {
-        font: THSarabun,
-        size: 14,
-        x: signatureLineX,
-        y: signatureLineY
-      })
-
-      const signatureLineWidth = THSarabun.widthOfTextAtSize(signatureLine, 14)
-
-      const TName = `ครู${item.TFirstName} ${item.TLastName}`
-      const TNameTextWidth = THSarabun.widthOfTextAtSize(TName, 14)
-
-      const teacherNameX = signatureLineX + (signatureLineWidth - TNameTextWidth) / 2
-
-      currentPage.drawText(
-        TName, {
-        font: THSarabun,
-        size: 14,
-        x: teacherNameX,
-        y: signatureLineY - 15
-      })
-
-      const teacherPositionX = signatureLineX + (signatureLineWidth - THSarabun.widthOfTextAtSize(item.TPosition, 14)) / 2
-
-      currentPage.drawText(
-        item.TPosition, {
-        font: THSarabun,
-        size: 14,
-        x: teacherPositionX,
-        y: signatureLineY - 30
-      })
+      // Draw signature section
+      const { signatureLineY } = await drawSignature(currentPage, item, assets.THSarabun, finalYPosition)
 
       if (isFirstDocOnPage) {
         currentPage.drawText(
           '-----------------------------------------------------------------------------------------------------------------------------------------------------', {
-          font: THSarabun,
-          size: 14,
-          x: MARGIN.left,
+          font: assets.THSarabun,
+          size: PDF_CONFIG.FONT_SIZE,
+          x: PDF_CONFIG.MARGIN.left,
           y: signatureLineY - 50
         })
       }
@@ -300,11 +214,13 @@ export const documentBuilder = async (data: docData[]) => {
       isFirstDocOnPage = false
     }
 
-    const base64DataUri = await pdfDoc.saveAsBase64({ dataUri: true })
-    return base64DataUri
+    return await pdfDoc.saveAsBase64({ dataUri: true })
 
   } catch (err) {
     console.error('Error generating PDF:', err)
-    return error(500, 'Failed to generate PDF. Please try again.')
+    if (err instanceof PDFGenerationError) {
+      throw err
+    }
+    throw new PDFGenerationError('Failed to generate PDF', err as Error)
   }
 }

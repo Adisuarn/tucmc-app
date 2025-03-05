@@ -31,5 +31,23 @@ export function formatThaiDate(isoDateString: string): string {
   const month = thaiMonths[date.getMonth()];
   const year = date.getFullYear() + 543;
 
-  return `วันที่ ${day} เดือน ${month} พ.ศ. ${year}`;
+  return `วันที่ ${day} ${month} พ.ศ. ${year}`;
 }
+
+export const PDF_CONFIG = {
+  FONT_SIZE: 14,
+  MARGIN: {
+    left: 70,
+    right: 70
+  },
+  BASE_HEIGHT: 230,
+  START_Y: 780,
+  LINE_HEIGHT: 20,
+  ASSETS_PATH: './src/server/assets'
+} as const
+
+export const PDF_ASSETS = {
+  SARABUN: 'THSarabunNew.ttf',
+  SARABUN_BOLD: 'THSarabunNew Bold.ttf',
+  LOGO: 'Logo.png'
+} as const

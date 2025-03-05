@@ -1,5 +1,5 @@
 import { t, error } from 'elysia'
-import { StringField } from '@/server/utils/validators'
+import { StringField } from '@/server/api/utils/validators'
 
 export interface student {
   title: string,

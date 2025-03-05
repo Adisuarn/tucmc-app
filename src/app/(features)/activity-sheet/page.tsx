@@ -5,63 +5,14 @@ import ActivityDetail from '@components/activity-sheet/activity-detail'
 import { useState } from 'react'
 import ActivityStudents from '@components/activity-sheet/activity-students'
 import { Formik, Form, FormikErrors } from 'formik'
-import * as Yup from 'yup'
 import { Button } from '@components/ui/button'
 import { api } from '@/libs/api'
 import { toast } from 'sonner'
 import PDFPagination from '@components/pdf-pagination'
 import { cn } from '@/libs/utils'
 import { Loader2 } from "lucide-react";
-
-const ActivitySheetSchema = Yup.object().shape({
-  sheets: Yup.array().of(
-    Yup.object().shape({
-      id: Yup.string().required(),
-      activityName: Yup.string().required('กรุณากรอกชื่อกิจกรรม'),
-      date: Yup.string(),
-      startPeriod: Yup.string(),
-      endPeriod: Yup.string(),
-      TFirstName: Yup.string().required('กรุณากรอกชื่อจริง'),
-      TLastName: Yup.string(),
-      TPosition: Yup.string(),
-      room: Yup.string().required('กรุณากรอกห้อง').min(1, 'เลขห้องต้องมากกว่า 0'),
-      students: Yup.array().of(
-        Yup.object().shape({
-          title: Yup.string().required('กรุณาเลือกคำนำหน้า'),
-          firstName: Yup.string().required('กรุณากรอกชื่อจริง'),
-          lastName: Yup.string().required('กรุณากรอกนามสกุล'),
-          level: Yup.string().required('กรุณาเลือกระดับชั้น'),
-          number: Yup.string().required('กรุณากรอกเลขที่'),
-        })
-      )
-    })
-  )
-})
-
-const createEmptySheet = (id: number) => ({
-  id,
-  activityName: '',
-  date: '',
-  startPeriod: '1',
-  endPeriod: '8',
-  room: '',
-  TFirstName: '',
-  TLastName: '',
-  TPosition: '',
-  students: [
-    {
-      title: '',
-      firstName: '',
-      lastName: '',
-      level: '',
-      number: '',
-    }
-  ]
-})
-
-const initialValues = {
-  sheets: [createEmptySheet(1)]
-}
+import { ActivitySheetSchema, initialValues, createEmptySheet } from '@components/activity-sheet/constants'
+import { AddNotes } from '@/vectors/AddNotes'
 
 const ActivitySheetPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -150,8 +101,8 @@ const ActivitySheetPage = () => {
             />
 
             <div className="w-full md:grid md:grid-cols-2 gap-x-3">
-              <div className="hidden md:flex md:w-full border md:justify-center md:items-center">
-                Some Image Logo
+              <div className="hidden md:flex md:w-full md:justify-center md:items-center md:p-10">
+                <AddNotes />
               </div>
               <section className="mt-10 w-full flex flex-col items-center">
                 <ActivityDetail

@@ -18,7 +18,7 @@ export default function ToolCard({ title, description, icon, href, className, us
       href={usable ? href : "#"}
       className={cn(
         className,
-        usable ? '' : 'pointer-events-none',
+        usable ? '' : 'pointer-events-none border-none',
         'block border border-[#f687b3] bg-white text-[#f687b3] rounded-lg shadow-md overflow-hidden group relative',
         'hover:bg-[#f687b3] hover:text-white hover:border-[#f687b3]',
         'transition-colors duration-300'
@@ -33,7 +33,7 @@ export default function ToolCard({ title, description, icon, href, className, us
       </div>
 
       {!usable && (
-        <div className="absolute inset-0 backdrop-blur-xs bg-black/20 flex flex-col items-center justify-center">
+        <div className="absolute inset-0 backdrop-blur-xs bg-black/20 border flex flex-col items-center justify-center">
           <XCircle className="w-12 h-12 text-red-500 mb-2" />
           <span className="text-white font-semibold">Coming Soon</span>
         </div>

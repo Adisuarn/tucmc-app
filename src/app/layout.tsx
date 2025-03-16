@@ -12,17 +12,17 @@ import Footer from "@components/footer/footer";
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const notoSansThai = Noto_Sans_Thai({ variable: '--font-noto-sans-thai', subsets: ['thai'] })
 
-const  RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn('min-h-dvh font-sans antialiased', geistSans.variable, notoSansThai.variable)}>
         <Providers>
+          <Header />
           <main>
-            <Header />
             {children}
-            <Footer />
           </main>
-          <Toaster  position="top-center" richColors />
+          <Footer />
+          <Toaster position="top-center" richColors />
         </Providers>
       </body>
     </html>

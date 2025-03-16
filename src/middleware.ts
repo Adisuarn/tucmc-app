@@ -4,8 +4,8 @@ import { getSessionCookie } from "better-auth/cookies";
 export async function middleware(req: NextRequest) {
   const sessionCookie = getSessionCookie(req);
 
-  if (!sessionCookie && req.nextUrl.pathname !== "/sign-in") {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
+  if (!sessionCookie && req.nextUrl.pathname !== "/auth/sign-in") {
+    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
   }
 
   return NextResponse.next();

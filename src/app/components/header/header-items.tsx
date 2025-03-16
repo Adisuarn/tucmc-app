@@ -4,6 +4,7 @@ import type { Session } from "@/libs/auth/auth-types"
 import { Button } from "@components/ui/button"
 import Link from "next/link"
 import { unAuthenticated, authenticated } from "./constants"
+import { UserButton } from "@daveyplate/better-auth-ui"
 
 const NavButton = ({
   text,
@@ -44,6 +45,21 @@ const HeaderItems = ({ session }: { session: Session | null }) => {
           fn={button.fn}
         />
       ))}
+      <UserButton
+        classNames={{
+          trigger: {
+            avatar: {
+              base: 'size-10',
+              image: 'size-10'
+            }
+          },
+          content: {
+            avatar: {
+              base: 'rounded-full size-8'
+            }
+          }
+        }}
+      />
     </div>
   )
 }

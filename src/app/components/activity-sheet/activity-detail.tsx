@@ -63,7 +63,7 @@ const ActivityDetail = ({ namePrefix = '' }: Props) => {
       <div className="flex flex-col w-full mt-5">
         <div className="w-full">
           <Label htmlFor={`${namePrefix}.activityDetail`} className="text-lg">วันที่</Label>
-          <div className="flex border min-w-full w-full rounded-sm justify-center">
+          <div className="flex min-w-full w-full justify-center">
             <ThaiDatePicker
               value={currentSheetDate}
               clearable={false}

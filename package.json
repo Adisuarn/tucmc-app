@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@daveyplate/better-auth-ui": "^1.2.33",
     "@elysiajs/eden": "^1.2.0",
     "@neondatabase/serverless": "^0.10.4",
     "@pdf-lib/fontkit": "^1.1.1",
@@ -30,7 +31,9 @@
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.1.3",
     "@react-hookz/web": "^25.0.1",
+    "@react-spring/web": "^9.7.5",
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.66.9",
     "better-auth": "^1.2.3",

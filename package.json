@@ -1,5 +1,5 @@
 {
-  "name": "tucc-app",
+  "name": "tucmc-app",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -40,6 +40,7 @@
     "elysia": "^1.2.22",
     "formik": "^2.4.6",
     "lucide-react": "^0.476.0",
+    "motion": "^12.4.10",
     "next": "^15.0.1",
     "next-themes": "^0.4.4",
     "pdf-lib": "^1.17.1",

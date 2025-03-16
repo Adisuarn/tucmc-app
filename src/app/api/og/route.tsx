@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og'
 export function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
 
-  const title = searchParams.get('title') ?? 'TUCC APP'
+  const title = searchParams.get('title') ?? 'TUCMC APP'
   const description =
     searchParams.get('description') ??
     'Application for facilitating TUCMC'

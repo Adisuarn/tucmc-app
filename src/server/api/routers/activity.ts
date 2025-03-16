@@ -1,6 +1,6 @@
 import { createElysiaRouter } from "../root";
 import { documentBuilder } from "../controllers/activity.controller";
-import { t, error } from "elysia"
+import { error } from "elysia"
 import { pdfGenerateBody } from "../types/activity.type";
 
 export const activityRouter = createElysiaRouter({ prefix: '/activity'})

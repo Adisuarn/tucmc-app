@@ -9,7 +9,7 @@ const Header = async () => {
       <div className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Sparkles className="h-8 w-8 text-[#f687b3]" />
-          <span className="text-2xl font-bold text-gray-800">TUCC APP</span>
+          <span className="text-2xl font-bold text-gray-800">TUCMC APP</span>
         </div>
         <div className="flex items-center space-x-4">
           <HeaderItems session={session} />

@@ -5,7 +5,7 @@ import { getBaseUrl } from '@/libs/utils'
 export const createMetadata = (
   override: Omit<Metadata, 'title'> & { title?: string },
 ): Metadata => {
-  const siteName = 'TUCC App'
+  const siteName = 'TUCMC App'
 
   const url = override.openGraph?.url
     ? `${getBaseUrl()}${override.openGraph.url}`
@@ -21,7 +21,7 @@ export const createMetadata = (
     title: override.title ? `${siteName} | ${override.title}` : siteName,
     description:
       override.description ??
-      'TUCC Application',
+      'TUCMC Application',
     applicationName: siteName,
     alternates: { canonical: url },
     twitter: { card: 'summary_large_image' },

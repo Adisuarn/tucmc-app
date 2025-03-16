@@ -7,5 +7,5 @@ export default {
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  tablesFilter: ["tucc-app_*"],
+  tablesFilter: ["tucmc-app_*"],
 } satisfies Config;

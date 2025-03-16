@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 import { XCircle } from "lucide-react"
+import { cn } from "@/libs/utils"
 
 interface ToolCardProps {
   title: string
@@ -15,14 +16,20 @@ export default function ToolCard({ title, description, icon, href, className, us
   return (
     <Link
       href={usable ? href : "#"}
-      className={`block ${className} rounded-lg shadow-md overflow-hidden group relative ${!usable && 'pointer-events-none'}`}
+      className={cn(
+        className,
+        usable ? '' : 'pointer-events-none',
+        'block border border-[#f687b3] bg-white text-[#f687b3] rounded-lg shadow-md overflow-hidden group relative',
+        'hover:bg-[#f687b3] hover:text-white hover:border-[#f687b3]',
+        'transition-colors duration-300'
+      )}
     >
       <div className="p-6 h-full transition-all duration-300 group-hover:shadow-xl">
-        <div className="flex items-center justify-center mb-4 text-white transition-transform duration-300 group-hover:scale-110">
+        <div className="flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110">
           {icon}
         </div>
-        <h2 className="text-xl font-semibold text-center text-white mb-2">{title}</h2>
-        <p className="text-center text-white text-opacity-90">{description}</p>
+        <h2 className="text-xl font-semibold text-center  mb-2">{title}</h2>
+        <p className="text-center  text-opacity-90">{description}</p>
       </div>
 
       {!usable && (

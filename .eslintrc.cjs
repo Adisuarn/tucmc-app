@@ -4,6 +4,7 @@ const config = {
   "parserOptions": {
     "project": true
   },
+  "ignorePatterns": [".eslintrc.cjs", "**/*.json", "postcss.config.js", "next.config.js"],
   "plugins": [
     "@typescript-eslint",
     "drizzle"

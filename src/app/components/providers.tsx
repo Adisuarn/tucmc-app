@@ -32,9 +32,9 @@ export const Providers = ({ children }: Readonly<{ children: ReactNode }>) => {
           //eslint-disable-next-line
           replace={router.replace}
           onSessionChange={() => router.refresh()}
-          //@ts-expect-error - Link is not assignable to React.ComponentType
           LinkComponent={Link}
           settingsUrl='/settings'
+          noColorIcons={true}
         >
           {children}
         </AuthUIProvider>
